@@ -3,54 +3,104 @@ using UnityEngine.SceneManagement;
 
 public class UIController : MonoBehaviour
 {
+    [Header("UI Elements")]
+    public GameObject crosshair;       // ✅ Kéo Crosshair (UI Image) vào Inspector
+    public GameObject pausePanel;      // ✅ Kéo Panel Pause vào Inspector
+
+    private bool isPaused = false;
+
     // ================== MAIN MENU ==================
-    // Gọi khi bấm nút Play ở Main Menu
     public void StartGame()
     {
-        Time.timeScale = 1f; // Đảm bảo game không bị pause
+        Time.timeScale = 1f;
         SceneManager.LoadScene("PlayGame");
+        ShowCrosshair(true);
     }
 
-    // Gọi khi bấm nút Settings ở Main Menu
     public void OpenSettings()
     {
         SceneManager.LoadScene("Settings");
+        ShowCrosshair(false);
     }
 
-    // Gọi khi bấm nút Exit ở Main Menu
     public void ExitGame()
     {
         Application.Quit();
-        Debug.Log("Quitting game..."); // Chỉ hiển thị trong Unity Editor
+        Debug.Log("Quitting game...");
     }
 
     // ================== TRONG GAME ==================
-    // Gọi khi bấm nút Back (từ PlayGame → MainMenu)
     public void BackToMainMenu()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
+        ShowCrosshair(false);
+    }
+
+    // ================== PAUSE MENU ==================
+    public void TogglePause()
+    {
+        isPaused = !isPaused;
+
+        if (isPaused)
+        {
+            Time.timeScale = 0f; // Dừng game
+            pausePanel.SetActive(true);
+            ShowCrosshair(false);
+        }
+        else
+        {
+            Time.timeScale = 1f; // Tiếp tục game
+            pausePanel.SetActive(false);
+            ShowCrosshair(true);
+        }
+    }
+
+    public void ResumeGame()
+    {
+        Time.timeScale = 1f;
+        pausePanel.SetActive(false);
+        ShowCrosshair(true);
+        isPaused = false;
     }
 
     // ================== WIN / LOSE PANEL ==================
-    // Gọi khi bấm nút Replay (chơi lại)
     public void ReplayGame()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("PlayGame");
+        ShowCrosshair(true);
     }
 
-    // Gọi khi bấm nút Quit (thoát hẳn game)
     public void QuitGame()
     {
         Debug.Log("QuitGame");
         Application.Quit();
     }
 
-    // Gọi khi bấm nút Go to Main Menu (từ Win/Lose Panel → Main Menu)
     public void GoToMainMenu()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
+        ShowCrosshair(false);
+    }
+
+    // ================== CROSSHAIR ==================
+    private void ShowCrosshair(bool isShow)
+    {
+        if (crosshair != null)
+            crosshair.SetActive(isShow);
+    }
+
+    // Khi bắt đầu scene PlayGame thì crosshair sẽ hiện
+    private void OnEnable()
+    {
+        if (SceneManager.GetActiveScene().name == "PlayGame")
+            ShowCrosshair(true);
+        else
+            ShowCrosshair(false);
+
+        if (pausePanel != null)
+            pausePanel.SetActive(false); // Ẩn pause panel lúc đầu
     }
 }
